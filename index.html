@@ -234,6 +234,27 @@ ul{list-style:none}
 .form-status .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .form-status .acts a{font-weight:700;font-size:14px;color:var(--purple);background:#fff;border:1.5px solid var(--purple-line);border-radius:999px;padding:8px 14px}
 .form .btn[disabled]{opacity:.6;cursor:wait;transform:none}
+.field .err-msg{display:none;color:#B42318;font-size:13px;font-weight:500;margin-top:6px}
+.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:#B42318;box-shadow:0 0 0 3px rgba(180,35,24,.08)}
+.field.invalid .err-msg{display:block}
+.agree.invalid{color:#B42318}
+.agree-err{display:none;color:#B42318;font-size:13px;font-weight:500;margin:-12px 0 16px 26px}
+.agree-err.show{display:block}
+.field select:invalid{color:var(--muted)}
+.field select option{color:var(--ink)}
+.form-done{display:none;text-align:center;padding:12px 4px 4px}
+.form.done .form-body{display:none}
+.form.done .form-done{display:block}
+.form-done .check{width:64px;height:64px;border-radius:50%;background:var(--purple-tint);color:var(--purple);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.form-done .check svg{width:32px;height:32px}
+.form-done h3{margin-bottom:8px}
+.form-done .lead2{color:var(--ink-2);font-size:15px;line-height:1.7;margin-bottom:20px}
+.form-done dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;text-align:left;background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 20px;font-size:14.5px}
+.form-done dt{color:var(--muted);font-weight:700}
+.form-done dd{color:var(--ink);word-break:break-all}
+.form-done .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.form-done .acts .btn{width:auto}
+.form-done .again{background:none;border:0;color:var(--purple);font:inherit;font-size:14px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;margin-top:14px}
 .direct{display:grid;gap:14px}
 .dcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;display:flex;align-items:center;gap:16px}
 .dcard .ic{width:46px;height:46px;border-radius:12px;background:var(--purple);color:#fff;display:grid;place-items:center;flex:none}
@@ -609,15 +630,17 @@ ul{list-style:none}
 
     <div class="contact" id="contact">
       <form class="form" id="consultForm" novalidate>
+        <div class="form-body">
         <h3>상담 신청 남기기</h3>
         <p class="sub">남겨 주신 내용은 변호사가 직접 확인합니다. 1영업일 이내에 연락드립니다.</p>
         <div class="row2">
-          <div class="field"><label for="f-name">성함 <i>*</i></label><input id="f-name" name="name" type="text" placeholder="홍길동" required autocomplete="name"></div>
-          <div class="field"><label for="f-phone">연락처 <i>*</i></label><input id="f-phone" name="phone" type="tel" placeholder="010-0000-0000" required autocomplete="tel"></div>
+          <div class="field"><label for="f-name">성함 <i>*</i></label><input id="f-name" name="name" type="text" placeholder="홍길동" required autocomplete="name"><p class="err-msg">성함을 입력해 주세요.</p></div>
+          <div class="field"><label for="f-phone">연락처 <i>*</i></label><input id="f-phone" name="phone" type="tel" placeholder="010-0000-0000" required autocomplete="tel" inputmode="tel"><p class="err-msg">연락받으실 전화번호를 정확히 입력해 주세요.</p></div>
         </div>
         <div class="field">
-          <label for="f-area">상담 분야</label>
-          <select id="f-area" name="area">
+          <label for="f-area">상담 분야 <i>*</i></label>
+          <select id="f-area" name="area" required>
+            <option value="" disabled selected>상담 분야를 선택해 주세요</option>
             <option>이혼 · 상간 손해배상</option>
             <option>학교폭력 · 소년사건</option>
             <option>형사 사건</option>
@@ -626,13 +649,24 @@ ul{list-style:none}
             <option>고소 · 소송 절차</option>
             <option>기타 · 잘 모르겠어요</option>
           </select>
+          <p class="err-msg">상담 분야를 선택해 주세요. 잘 모르시면 「기타 · 잘 모르겠어요」를 고르시면 됩니다.</p>
         </div>
         <div class="hp" aria-hidden="true"><label for="f-website">웹사이트</label><input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-        <div class="field"><label for="f-msg">상담 내용</label><textarea id="f-msg" name="message" placeholder="편하게 적어 주세요. 상황과 궁금한 점을 간단히 남겨 주시면 됩니다."></textarea></div>
-        <label class="agree"><input type="checkbox" id="f-agree" required> <span><a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다. 수집 항목은 성함·연락처·상담 내용이며, 상담 신청 확인과 회신 목적으로만 이용하고 목적 달성 후 지체 없이 파기합니다. 신청 내용은 리봄이 사용하는 구글 워크스페이스에 보관됩니다(<a href="privacy.html#a4" target="_blank" rel="noopener">처리방침 제4조</a>). 동의를 거부하실 수 있으나 이 경우 홈페이지를 통한 상담 신청이 제한됩니다.</span></label>
+        <div class="field"><label for="f-msg">상담 내용 <i>*</i></label><textarea id="f-msg" name="message" required placeholder="편하게 적어 주세요. 상황과 궁금한 점을 간단히 남겨 주시면 됩니다."></textarea><p class="err-msg">상담받고 싶은 내용을 간단히 적어 주세요.</p></div>
+        <label class="agree"><input type="checkbox" id="f-agree" required> <span><a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다. 수집 항목은 성함·연락처·상담 분야·상담 내용이며, 상담 신청 확인과 회신 목적으로만 이용하고 목적 달성 후 지체 없이 파기합니다. 신청 내용은 리봄이 사용하는 구글 워크스페이스에 보관됩니다(<a href="privacy.html#a4" target="_blank" rel="noopener">처리방침 제4조</a>). 동의를 거부하실 수 있으나 이 경우 홈페이지를 통한 상담 신청이 제한됩니다.</span></label>
+        <p class="agree-err" id="agreeErr">개인정보 수집·이용에 동의해 주셔야 신청할 수 있습니다.</p>
         <button class="btn btn-gold" type="submit">상담 신청 보내기</button>
         <p class="hint">신청 내용은 변호사에게 바로 전달됩니다. 급하신 경우 전화 010-5088-5986 으로 바로 연락 주세요.</p>
         <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+        </div>
+        <div class="form-done" id="formDone" tabindex="-1" aria-live="polite">
+          <div class="check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h3>상담 신청이 접수되었습니다</h3>
+          <p class="lead2" id="doneLead"></p>
+          <dl id="doneSummary"></dl>
+          <div class="acts"><a class="btn btn-purple" href="tel:010-5088-5986">급하시면 전화 010-5088-5986</a></div>
+          <button type="button" class="again" id="againBtn">다른 내용으로 새로 신청하기</button>
+        </div>
       </form>
       <div class="direct">
         <a class="dcard gold" href="tel:010-5088-5986">
@@ -770,23 +804,56 @@ ul{list-style:none}
     show('err','<b>신청이 전송되지 않았습니다</b>잠시 후 다시 시도하시거나, 아래 방법으로 바로 연락 주세요. 작성하신 내용은 메일에 그대로 채워집니다.'+
       '<span class="acts"><a href="tel:'+TEL+'">전화 '+TEL+'</a><a href="'+mailHref(d)+'">메일로 보내기</a></span>');
   }
+  var doneBox=document.getElementById('formDone');
+  function esc(t){return String(t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function setInvalid(el,bad){var f=el.closest('.field');if(f)f.classList.toggle('invalid',bad);}
+  ['name','phone','area','message'].forEach(function(k){
+    var el=form.elements[k];el.addEventListener(k==='area'?'change':'input',function(){setInvalid(el,false);});
+  });
+  document.getElementById('f-agree').addEventListener('change',function(){document.getElementById('agreeErr').classList.remove('show');});
+  function validate(d){
+    var bad=[];
+    if(!d.name)bad.push(form.elements.name);
+    if((d.phone.match(/\d/g)||[]).length<9)bad.push(form.elements.phone);
+    if(!d.area)bad.push(form.elements.area);
+    if(!d.message)bad.push(form.elements.message);
+    ['name','phone','area','message'].forEach(function(k){setInvalid(form.elements[k],bad.indexOf(form.elements[k])>=0);});
+    var agreeOk=document.getElementById('f-agree').checked;
+    document.getElementById('agreeErr').classList.toggle('show',!agreeOk);
+    if(bad.length){bad[0].focus();bad[0].scrollIntoView({behavior:'smooth',block:'center'});return false;}
+    if(!agreeOk){document.getElementById('f-agree').focus();return false;}
+    return true;
+  }
+  function done(d){
+    var now=new Date(),pad=function(n){return(n<10?'0':'')+n;};
+    var when=now.getFullYear()+'. '+(now.getMonth()+1)+'. '+now.getDate()+'. '+pad(now.getHours())+':'+pad(now.getMinutes());
+    document.getElementById('doneLead').innerHTML=esc(d.name)+'님, 신청이 정상적으로 리봄에 전달되었습니다.<br>1영업일 안에 남겨 주신 연락처로 변호사가 직접 연락드리겠습니다.';
+    document.getElementById('doneSummary').innerHTML='<dt>접수 시각</dt><dd>'+when+'</dd><dt>연락처</dt><dd>'+esc(d.phone)+'</dd><dt>상담 분야</dt><dd>'+esc(d.area)+'</dd>';
+    statusBox.className='form-status';statusBox.innerHTML='';
+    form.classList.add('done');
+    var y=form.getBoundingClientRect().top+window.pageYOffset-90;
+    window.scrollTo({top:y,behavior:'smooth'});
+    doneBox.focus({preventScroll:true});
+  }
+  document.getElementById('againBtn').addEventListener('click',function(){
+    form.reset();form.classList.remove('done');openedAt=Date.now();form.elements.name.focus();
+  });
   form.addEventListener('submit',function(e){
     e.preventDefault();
     var d={name:form.elements.name.value.trim(),phone:form.elements.phone.value.trim(),area:form.elements.area.value,message:form.elements.message.value.trim()};
-    if(!d.name||!d.phone){alert('성함과 연락처를 입력해 주세요.');return;}
-    if(!document.getElementById('f-agree').checked){alert('개인정보 수집·이용에 동의해 주셔야 상담 신청이 접수됩니다.');return;}
+    if(!validate(d))return;
     if(!FORM_ENDPOINT){fail(d);return;}
     var body=new URLSearchParams({name:d.name,phone:d.phone,area:d.area,message:d.message,agree:'yes',
       website:form.elements.website.value,elapsed:String(Date.now()-openedAt)});
     var ctrl=('AbortController' in window)?new AbortController():null;
     var timer=setTimeout(function(){if(ctrl)ctrl.abort();},20000);
     submitBtn.disabled=true;submitBtn.textContent='보내는 중…';
+    statusBox.className='form-status';
     fetch(FORM_ENDPOINT,{method:'POST',body:body,signal:ctrl?ctrl.signal:undefined})
       .then(function(r){return r.json();})
       .then(function(res){
         if(!res||!res.ok)throw new Error((res&&res.error)||'fail');
-        form.reset();
-        show('ok','<b>상담 신청이 접수되었습니다</b>'+d.name+'님, 1영업일 안에 남겨 주신 연락처로 연락드리겠습니다. 급하신 경우 <a href="tel:'+TEL+'">'+TEL+'</a> 으로 전화 주세요.');
+        done(d);
       })
       .catch(function(){fail(d);})
       .then(function(){clearTimeout(timer);submitBtn.disabled=false;submitBtn.textContent='상담 신청 보내기';});
