@@ -225,6 +225,15 @@ ul{list-style:none}
 .agree a{color:var(--purple);text-decoration:underline;text-underline-offset:3px}
 .form .btn{width:100%}
 .form .hint{font-size:12.5px;color:var(--muted);margin-top:12px;text-align:center}
+.hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+.form-status{display:none;margin-top:16px;padding:16px 18px;border-radius:12px;font-size:14.5px;line-height:1.6}
+.form-status.show{display:block}
+.form-status.ok{background:var(--purple-tint);border:1px solid var(--purple-line);color:var(--purple)}
+.form-status.err{background:var(--gold-pale);border:1px solid #E8CFA6;color:var(--ink)}
+.form-status b{display:block;font-size:16px;margin-bottom:4px}
+.form-status .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.form-status .acts a{font-weight:700;font-size:14px;color:var(--purple);background:#fff;border:1.5px solid var(--purple-line);border-radius:999px;padding:8px 14px}
+.form .btn[disabled]{opacity:.6;cursor:wait;transform:none}
 .direct{display:grid;gap:14px}
 .dcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;display:flex;align-items:center;gap:16px}
 .dcard .ic{width:46px;height:46px;border-radius:12px;background:var(--purple);color:#fff;display:grid;place-items:center;flex:none}
@@ -618,10 +627,12 @@ ul{list-style:none}
             <option>기타 · 잘 모르겠어요</option>
           </select>
         </div>
+        <div class="hp" aria-hidden="true"><label for="f-website">웹사이트</label><input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="field"><label for="f-msg">상담 내용</label><textarea id="f-msg" name="message" placeholder="편하게 적어 주세요. 상황과 궁금한 점을 간단히 남겨 주시면 됩니다."></textarea></div>
-        <label class="agree"><input type="checkbox" id="f-agree" required> <span><a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다. 수집 항목은 성함·연락처·상담 내용이며, 상담 신청 확인과 회신 목적으로만 이용하고 목적 달성 후 지체 없이 파기합니다. 동의를 거부하실 수 있으나 이 경우 홈페이지를 통한 상담 신청이 제한됩니다.</span></label>
+        <label class="agree"><input type="checkbox" id="f-agree" required> <span><a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다. 수집 항목은 성함·연락처·상담 내용이며, 상담 신청 확인과 회신 목적으로만 이용하고 목적 달성 후 지체 없이 파기합니다. 신청 내용은 리봄이 사용하는 구글 워크스페이스에 보관됩니다(<a href="privacy.html#a4" target="_blank" rel="noopener">처리방침 제4조</a>). 동의를 거부하실 수 있으나 이 경우 홈페이지를 통한 상담 신청이 제한됩니다.</span></label>
         <button class="btn btn-gold" type="submit">상담 신청 보내기</button>
-        <p class="hint">신청 내용은 shpark@rebomlaw.com 으로 전달됩니다. 급하신 경우 전화 010-5088-5986 으로 바로 연락 주세요.</p>
+        <p class="hint">신청 내용은 변호사에게 바로 전달됩니다. 급하신 경우 전화 010-5088-5986 으로 바로 연락 주세요.</p>
+        <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
       </form>
       <div class="direct">
         <a class="dcard gold" href="tel:010-5088-5986">
@@ -740,19 +751,45 @@ ul{list-style:none}
     box.appendChild(f);
   }
 
-  /* 상담 신청 폼: 서버 없이 메일 작성창으로 전달합니다.
-     Formspree 등 폼 서비스를 쓰려면 아래 USE_MAILTO를 false로 두고 form 태그에 action/method를 넣으면 됩니다. */
-  var USE_MAILTO=true;
+  /* 상담 신청 폼: 리봄 구글 워크스페이스의 앱스 스크립트(시트 저장 + 메일 알림)로 보냅니다.
+     FORM_ENDPOINT가 비어 있거나 전송이 실패하면 전화 · 메일 대안을 보여 줍니다.
+     설치·주소 교체 방법은 상담폼_연결_가이드.md 참고. */
+  var FORM_ENDPOINT='https://script.google.com/macros/s/AKfycbwgaQq7lJHsB__izG3zIVMRbKAy1YxIA1WQL3xi8zDglcsqa3PdP-DhpqZTasrFdmTI/exec';
+  var MAIL='shpark@rebomlaw.com', TEL='010-5088-5986';
   var form=document.getElementById('consultForm');
+  var statusBox=document.getElementById('formStatus');
+  var submitBtn=form.querySelector('button[type="submit"]');
+  var openedAt=Date.now();
+  function mailHref(d){
+    var subject='[홈페이지 상담 신청] '+d.name+' · '+d.area;
+    var body='성함: '+d.name+'\n연락처: '+d.phone+'\n상담 분야: '+d.area+'\n\n상담 내용:\n'+(d.message||'(작성하지 않음)')+'\n\n개인정보 수집·이용 동의: 예\n신청 경로: 법률사무소 리봄 홈페이지';
+    return 'mailto:'+MAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  }
+  function show(kind,html){statusBox.className='form-status show '+kind;statusBox.innerHTML=html;statusBox.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  function fail(d){
+    show('err','<b>신청이 전송되지 않았습니다</b>잠시 후 다시 시도하시거나, 아래 방법으로 바로 연락 주세요. 작성하신 내용은 메일에 그대로 채워집니다.'+
+      '<span class="acts"><a href="tel:'+TEL+'">전화 '+TEL+'</a><a href="'+mailHref(d)+'">메일로 보내기</a></span>');
+  }
   form.addEventListener('submit',function(e){
-    var name=form.name.value.trim(),phone=form.phone.value.trim(),area=form.area.value,msg=form.message.value.trim(),agree=document.getElementById('f-agree').checked;
-    if(!name||!phone){e.preventDefault();alert('성함과 연락처를 입력해 주세요.');return;}
-    if(!agree){e.preventDefault();alert('개인정보 수집·이용에 동의해 주셔야 상담 신청이 접수됩니다.');return;}
-    if(!USE_MAILTO)return;
     e.preventDefault();
-    var subject='[홈페이지 상담 신청] '+name+' · '+area;
-    var body='성함: '+name+'\n연락처: '+phone+'\n상담 분야: '+area+'\n\n상담 내용:\n'+(msg||'(작성하지 않음)')+'\n\n개인정보 수집·이용 동의: 예\n신청 경로: 법률사무소 리봄 홈페이지';
-    window.location.href='mailto:shpark@rebomlaw.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+    var d={name:form.elements.name.value.trim(),phone:form.elements.phone.value.trim(),area:form.elements.area.value,message:form.elements.message.value.trim()};
+    if(!d.name||!d.phone){alert('성함과 연락처를 입력해 주세요.');return;}
+    if(!document.getElementById('f-agree').checked){alert('개인정보 수집·이용에 동의해 주셔야 상담 신청이 접수됩니다.');return;}
+    if(!FORM_ENDPOINT){fail(d);return;}
+    var body=new URLSearchParams({name:d.name,phone:d.phone,area:d.area,message:d.message,agree:'yes',
+      website:form.elements.website.value,elapsed:String(Date.now()-openedAt)});
+    var ctrl=('AbortController' in window)?new AbortController():null;
+    var timer=setTimeout(function(){if(ctrl)ctrl.abort();},20000);
+    submitBtn.disabled=true;submitBtn.textContent='보내는 중…';
+    fetch(FORM_ENDPOINT,{method:'POST',body:body,signal:ctrl?ctrl.signal:undefined})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res||!res.ok)throw new Error((res&&res.error)||'fail');
+        form.reset();
+        show('ok','<b>상담 신청이 접수되었습니다</b>'+d.name+'님, 1영업일 안에 남겨 주신 연락처로 연락드리겠습니다. 급하신 경우 <a href="tel:'+TEL+'">'+TEL+'</a> 으로 전화 주세요.');
+      })
+      .catch(function(){fail(d);})
+      .then(function(){clearTimeout(timer);submitBtn.disabled=false;submitBtn.textContent='상담 신청 보내기';});
   });
 })();
 </script>
