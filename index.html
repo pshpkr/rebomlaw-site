@@ -285,7 +285,7 @@
    "inLanguage": "ko-KR",
    "primaryImageOfPage": "https://rebomlaw.com/img/og.jpg",
    "datePublished": "2026-11-10",
-   "dateModified": "2026-11-14"
+   "dateModified": "2026-11-20"
   }
  ]
 }
@@ -454,6 +454,7 @@ ul{list-style:none}
 .field{margin-bottom:16px}
 .field label{display:block;font-size:14px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
 .field label i{color:var(--gold);font-style:normal}
+.field label .opt{color:var(--muted);font-weight:400;font-size:13px}
 .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px 14px;font:inherit;font-size:15px;color:var(--ink);background:#fff;outline:none}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(52,34,77,.1)}
 .field textarea{min-height:140px;resize:vertical}
@@ -891,7 +892,20 @@ ul{list-style:none}
         </div>
         <div class="hp" aria-hidden="true"><label for="f-website">웹사이트</label><input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="field"><label for="f-msg">상담 내용 <i>*</i></label><textarea id="f-msg" name="message" required placeholder="편하게 적어 주세요. 상황과 궁금한 점을 간단히 남겨 주시면 됩니다."></textarea><p class="err-msg">상담받고 싶은 내용을 간단히 적어 주세요.</p></div>
-        <label class="agree"><input type="checkbox" id="f-agree" required> <span><a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다. 수집 항목은 성함·연락처·상담 분야·상담 내용이며, 상담 신청 확인과 회신 목적으로만 이용하고 목적 달성 후 지체 없이 파기합니다. 신청 내용은 리봄이 사용하는 구글 워크스페이스에 보관됩니다(<a href="privacy.html#a4" target="_blank" rel="noopener">처리방침 제4조</a>). 동의를 거부하실 수 있으나 이 경우 홈페이지를 통한 상담 신청이 제한됩니다.</span></label>
+        <div class="field">
+          <label for="f-source">리봄을 어떻게 알게 되셨나요? <span class="opt">(선택)</span></label>
+          <select id="f-source" name="source">
+            <option value="">선택하지 않음</option>
+            <option>네이버 검색</option>
+            <option>구글 검색</option>
+            <option>AI 답변(ChatGPT·Perplexity·제미나이 등)</option>
+            <option>로톡</option>
+            <option>블로그·인스타그램</option>
+            <option>지인 소개</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <label class="agree"><input type="checkbox" id="f-agree" required> <span><a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다. 수집 항목은 성함·연락처·상담 분야·상담 내용과, 선택 항목인 알게 된 경로·들어온 사이트 이름이며, 상담 신청 확인과 회신 목적으로만 이용하고 목적 달성 후 지체 없이 파기합니다. 신청 내용은 리봄이 사용하는 구글 워크스페이스에 보관됩니다(<a href="privacy.html#a4" target="_blank" rel="noopener">처리방침 제4조</a>). 동의를 거부하실 수 있으나 이 경우 홈페이지를 통한 상담 신청이 제한됩니다.</span></label>
         <p class="agree-err" id="agreeErr">개인정보 수집·이용에 동의해 주셔야 신청할 수 있습니다.</p>
         <button class="btn btn-gold" type="submit">상담 신청 보내기</button>
         <p class="hint">신청 내용은 변호사에게 바로 전달됩니다. 급하신 경우 전화 010-5088-5986 으로 바로 연락 주세요.</p>
@@ -1000,7 +1014,7 @@ ul{list-style:none}
     </div>
     <div class="copy">
       <span>© 2026 법률사무소 리봄. All rights reserved.</span>
-      <span>최종 수정 <time datetime="2026-11-14">2026년 11월 14일</time> · <a href="privacy.html">개인정보처리방침</a></span>
+      <span>최종 수정 <time datetime="2026-11-20">2026년 11월 20일</time> · <a href="privacy.html">개인정보처리방침</a></span>
     </div>
   </div>
 </footer>
@@ -1032,6 +1046,13 @@ ul{list-style:none}
   var statusBox=document.getElementById('formStatus');
   var submitBtn=form.querySelector('button[type="submit"]');
   var openedAt=Date.now();
+  // 들어온 곳: AI·검색 답변에서 넘어왔는지 보기 위해 사이트 이름(도메인)과 utm_source만 남긴다. 전체 주소·검색어는 남기지 않는다.
+  var cameFrom=(function(){
+    var out=[];
+    try{var u=new URLSearchParams(location.search).get('utm_source');if(u)out.push('utm:'+u.slice(0,40));}catch(e){}
+    try{if(document.referrer){var r=new URL(document.referrer).hostname;if(r&&r!==location.hostname)out.push(r.slice(0,60));}}catch(e){}
+    return out.join(' / ');
+  })();
   function mailHref(d){
     var subject='[홈페이지 상담 신청] '+d.name+' · '+d.area;
     var body='성함: '+d.name+'\n연락처: '+d.phone+'\n상담 분야: '+d.area+'\n\n상담 내용:\n'+(d.message||'(작성하지 않음)')+'\n\n개인정보 수집·이용 동의: 예\n신청 경로: 법률사무소 리봄 홈페이지';
@@ -1082,7 +1103,8 @@ ul{list-style:none}
     if(!validate(d))return;
     if(!FORM_ENDPOINT){fail(d);return;}
     var body=new URLSearchParams({name:d.name,phone:d.phone,area:d.area,message:d.message,agree:'yes',
-      website:form.elements.website.value,elapsed:String(Date.now()-openedAt)});
+      website:form.elements.website.value,elapsed:String(Date.now()-openedAt),
+      source:form.elements.source.value,ref:cameFrom});
     var ctrl=('AbortController' in window)?new AbortController():null;
     var timer=setTimeout(function(){if(ctrl)ctrl.abort();},20000);
     submitBtn.disabled=true;submitBtn.textContent='보내는 중…';
